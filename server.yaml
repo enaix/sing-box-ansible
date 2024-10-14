@@ -1,0 +1,35 @@
+- name: Configure sing-box server
+  hosts: all
+  vars_files:
+    - config.yml
+  vars:
+    reality_privkey: ""
+    reality_pubkey: ""
+  tasks:
+    - name: Preliminary config check
+      ansible.builtin.assert:
+        that:
+          - {{ item.password }} != "PASSWORD"
+        msg: Please set user password in config.yml
+      loop: {{ users }}
+    
+    - name: Generate xray reality privkey
+      command: "sing-box generate reality-keypair"
+      register: keypair_out
+      vars:
+        reality_privkey: "{{ keypair_out | split('\n') | select('PrivateKey')[0] | split()[1] }}"
+        reality_pubkey: "{{ keypair_out | split('\n') | select('PublicKey')[0] | split()[1] }}"
+      msg: "GENERATED_PUBKEY: {{ reality_pubkey }}"
+      when: enable_xray
+
+    - name: Backup old config file
+      ansible.builtin.copy:
+        src: /etc/sing-box/config.json
+        dest: /etc/sing-box/config_backup.json
+        backup: true
+
+    - name: Generate config from template
+      template:
+        src: template.j2
+        dest: /etc/sing-box/config.json
+

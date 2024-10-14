@@ -1,0 +1,78 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "tls://{{ dns_ip }}"
+      }
+    ]
+  },
+  "inbounds": [
+  {% if enable_trojan %}
+    {
+      "type": "trojan",
+      "tag": "trojan-in",
+      "listen": "::",
+      "listen_port": {{ trojan_port }},
+      "users": [
+      {% for user in users %}
+      {
+        "name": "{{ user.name }}",
+        "password": "{{ user.password }}"
+      } {{ ',' if not loop.last else '' }}
+      {% endfor %}
+      ],
+      "tls": {}
+    }
+  {% endif %}
+  {{ ',' if enable_trojan and enable_xray else '' }}
+  {% if enable_xray %}
+    {
+      "type": "vless",
+      "listen": "::",
+      "listen_port": {{ xray_port }},
+      "users": [
+      {% for user in users %}
+      {
+        "name": "{{ user.name }}",
+        "uuid": "{{ user.password }}",
+	"flow": "xtls-rprx-vision"
+      } {{ ',' if not loop.last else '' }}
+      {% endfor %}
+      ],
+      "tls": {
+        "enabled": true,
+        "reality": {
+          "enabled": true,
+          "handshake": {
+            "server": "{{ reality_server }}",
+            "server_port": {{ reality_server_port }}
+          },
+          "private_key": "{{ reality_privkey }}",
+          "short_id": ["{{ reality_short_id }}"],
+          "max_time_difference": "1m"
+        }
+      }
+    }
+  {% endif %}
+  ],
+  "outbounds": [
+    {
+      "type": "direct"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      }
+    ]
+  }
+}
