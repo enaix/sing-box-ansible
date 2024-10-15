@@ -1,3 +1,17 @@
-enable_trojan: false
-enable_xray: true
+dns_ip: "1.1.1.1"
 
+xray:
+  enabled: true
+  port: 10134
+
+trojan:
+  enabled: false
+  port: 10130
+
+users:
+  - name: "root"
+    password: "PASSWORD"
+
+reality:
+  server: "telegram.org"
+  port: 443

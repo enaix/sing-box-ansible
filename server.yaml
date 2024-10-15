@@ -9,9 +9,9 @@
     - name: Preliminary config check
       ansible.builtin.assert:
         that:
-          - {{ item.password }} != "PASSWORD"
+          - "{{ item.password }} != 'PASSWORD'"
         msg: Please set user password in config.yml
-      loop: {{ users }}
+      loop: "{{ users }}"
     
     - name: Generate xray reality privkey
       command: "sing-box generate reality-keypair"
@@ -19,8 +19,7 @@
       vars:
         reality_privkey: "{{ keypair_out | split('\n') | select('PrivateKey')[0] | split()[1] }}"
         reality_pubkey: "{{ keypair_out | split('\n') | select('PublicKey')[0] | split()[1] }}"
-      msg: "GENERATED_PUBKEY: {{ reality_pubkey }}"
-      when: enable_xray
+      when: xray.enabled
 
     - name: Backup old config file
       ansible.builtin.copy:
@@ -37,3 +36,8 @@
       ansible.builtin.systemd:
         name: sing-box
         state: restarted
+
+    - name: Print generated variables
+      ansible.builtin.debug:
+        msg: "GENERATED_PUBKEY: {{ reality_pubkey }}\nPlease write it down"
+      when: xray.enabled

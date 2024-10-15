@@ -10,12 +10,12 @@
     ]
   },
   "inbounds": [
-  {% if enable_trojan %}
+  {% if trojan.enabled %}
     {
       "type": "trojan",
       "tag": "trojan-in",
       "listen": "::",
-      "listen_port": {{ trojan_port }},
+      "listen_port": {{ trojan.port }},
       "users": [
       {% for user in users %}
       {
@@ -27,12 +27,12 @@
       "tls": {}
     }
   {% endif %}
-  {{ ',' if enable_trojan and enable_xray else '' }}
-  {% if enable_xray %}
+  {{ ',' if trojan.enabled and xray.enabled else '' }}
+  {% if xray.enabled %}
     {
       "type": "vless",
       "listen": "::",
-      "listen_port": {{ xray_port }},
+      "listen_port": {{ xray.port }},
       "users": [
       {% for user in users %}
       {
@@ -47,8 +47,8 @@
         "reality": {
           "enabled": true,
           "handshake": {
-            "server": "{{ reality_server }}",
-            "server_port": {{ reality_server_port }}
+            "server": "{{ reality.server }}",
+            "server_port": {{ reality.port }}
           },
           "private_key": "{{ reality_privkey }}",
           "short_id": ["{{ reality_short_id }}"],

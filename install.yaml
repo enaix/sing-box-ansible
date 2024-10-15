@@ -2,32 +2,29 @@
   hosts: all
   tasks:
    - name: Check if sing-box is installed
-     block:
-       - name: Run which sing-box
-         ansible.builtin.raw: which sing-box
-         check_mode: false
-         changed_when: false
-         failed_when: which_res.rc > 1
-         register: which_res
-       - name: Exit if installed
-         ansible.builtin.meta: end_play
-           when: not which_res
-
-
-   - name: Add sing-box key
-   ansible.builtin.get_url:
-      url: https://sing-box.app/gpg.key
-      dest: /etc/apt/keyrings/sagernet.asc
-      checksum: sha256:803d5a2f09fe9d360008161aa2684e7f49a211d48a4116d0651b08bdd90bdea1
-
-   - name: Configure apt source
-     ansible.builtin.apt_repository:
-       repo: "deb [arch=`dpkg --print-architecture` signed-by=/etc/apt/keyrings/sagernet.asc] https://deb.sagernet.org/ * *"
-       state: present
+     ansible.builtin.raw: which sing-box
+     check_mode: false
+     changed_when: false
+     failed_when: which_res.rc > 1
+     register: is_installed
 
    - name: Install sing-box
-     ansible.builtin.apt:
-       name: sing-box
+     when: not is_installed
+     block:
+       - name: Add sing-box key
+         ansible.builtin.get_url:
+           url: https://sing-box.app/gpg.key
+           dest: /etc/apt/keyrings/sagernet.asc
+           checksum: sha256:803d5a2f09fe9d360008161aa2684e7f49a211d48a4116d0651b08bdd90bdea1
+
+       - name: Configure apt source
+         ansible.builtin.apt_repository:
+           repo: "deb [arch=`dpkg --print-architecture` signed-by=/etc/apt/keyrings/sagernet.asc] https://deb.sagernet.org/ * *"
+           state: present
+
+       - name: Install sing-box package
+         ansible.builtin.apt:
+           name: sing-box
 
    - name: Enable service
      ansible.builtin.systemd:
