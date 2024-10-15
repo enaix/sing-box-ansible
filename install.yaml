@@ -29,3 +29,8 @@
      ansible.builtin.apt:
        name: sing-box
 
+   - name: Enable service
+     ansible.builtin.systemd:
+       name: sing-box
+       enabled: true
+       masked: no

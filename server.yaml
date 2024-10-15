@@ -33,3 +33,7 @@
         src: template.j2
         dest: /etc/sing-box/config.json
 
+    - name: Restart service
+      ansible.builtin.systemd:
+        name: sing-box
+        state: restarted
