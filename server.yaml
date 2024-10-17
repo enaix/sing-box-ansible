@@ -24,11 +24,13 @@
       when: xray.enabled
 
     - name: Create backup dir
+      become: true
       ansible.builtin.file:
         path: /etc/sing-box/backup
         state: directory
 
     - name: Backup old config file
+      become: true
       ansible.builtin.copy:
         src: /etc/sing-box/config.json
         dest: /etc/sing-box/backup/config_backup.json
@@ -36,6 +38,7 @@
         remote_src: true
 
     - name: Generate config from template
+      become: true
       template:
         src: template.j2
         dest: /etc/sing-box/config.json
@@ -46,6 +49,7 @@
       failed_when: res.stdout != "" or res.stderr != "" 
 
     - name: Restart service
+      become: true
       ansible.builtin.systemd:
         name: sing-box
         state: restarted
