@@ -5,11 +5,11 @@
      ansible.builtin.raw: which sing-box
      check_mode: false
      changed_when: false
-     failed_when: which_res.rc > 1
-     register: is_installed
+     #failed_when: res.rc > 1
+     register: res
 
    - name: Install sing-box
-     when: not is_installed
+     when: res.rc > 1
      block:
        - name: Add sing-box key
          ansible.builtin.get_url:
